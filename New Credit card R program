@@ -1,0 +1,41 @@
+# Call all the required Libraries
+library(randomForest)
+library(e1071)
+library(rpart)
+library(rpart.plot)
+library(caTools)
+# Read the files from local Directories
+card<-read.csv("/home/ssc/Downloads/DATA/Credit card raw data/New CreditCard.csv")
+card<-na.omit(card)                                 # Omit NA Values from data sets
+str(card)                                           # find out each column data type
+card$Class<-factor(card$Class)                      # factorise the class data
+set.seed(1)             # set is to define proper way to both people who runs program from different ends
+nrow(card)                                          # No of Rows
+split<-sample.split(card$Class,SplitRatio = 0.75)   # Split the data in two sets ror traning and testing
+train<-subset(card,split==T)                        # 75 % data to testing
+test<-subset(card,split==F)                         # 25 % data to testing
+nrow(train)                                         # No of rows in Training datasets
+nrow(test)                                          # No of rows in testing datasets
+table(test$Class)                                   # to see 0 and 1 in that table
+glm.model<-glm(Class~.,data = train,family = "binomial") # form glm Model to find out the constants basically train the data
+glm.predict<-predict(glm.model,test,type = "response")   # predict the data after traing on test data
+glm.predict
+nrow(test)                                          # Test datasets rows
+table(test$Class,glm.predict>0.5)                   # To see confusion matrix
+(124+122)/(124+122+1+3)                             # Accuracy
+# Write the data in new File
+test$Class
+glm.predict
+test$predict<-glm.predict
+write.csv(test,"/home/ssc/Downloads/DATA/Credit card raw data/CheckCredit.csv")
+getwd()
+setwd("/home/ssc/Downloads/DATA/Credit card raw data/")
+# Prepare tree model to visualise the data
+tree.model<-rpart(Class~.,data = train,method = "class")
+prp(tree.model)                                     # Print tree model
+tree.predict<-predict(tree.model,test,type = "class")  # Check the tree model
+tree.predict
+table(test$Class,tree.predict)                      # Check the accurracy
+(127+123)/nrow(test)
+
+
